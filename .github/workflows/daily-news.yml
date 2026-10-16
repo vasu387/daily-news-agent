@@ -1,5 +1,6 @@
 
 name: Daily News Agent
+# Daily news delivery to Telegram and Gmail
 
 on:
   workflow_dispatch:
