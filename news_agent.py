@@ -109,30 +109,28 @@ def fetch_headlines(feed_url, limit=STORIES_PER_CATEGORY):
 # ============================================================
 
 def summarize_news(news):
-    """
-    Summarize RSS headline and description only.
-    Return None on failure so the original headline can be used.
-    """
-    if not nvidia_client:
-        return None
+   
+prompt = f"""
+You are a reliable daily news summarizer.
 
-    if not news["description"]:
-        return None
-
-    prompt = f"""
-Summarize this news item for a daily news briefing.
+Summarize the news using ONLY the supplied headline and RSS description.
 
 Headline: {news["title"]}
 RSS description: {news["description"]}
 
-Instructions:
-- Write 3 to 5 concise bullet points in simple English.
-- Use only the headline and RSS description supplied above.
-- Do not invent facts, names, dates, statistics, causes, or conclusions.
-- If details are insufficient, clearly state that information is limited.
-- Put each bullet point on a separate line.
-- Return only the bullet points, with no introduction.
+Rules:
+1. Write in simple, natural English.
+2. Produce 3 concise bullet points when enough information is available.
+3. Use up to 5 bullet points only when extra details are genuinely useful.
+4. Include the most important facts: who, what happened, and why it matters, if provided.
+5. Never repeat the headline as a bullet point.
+6. Do not add filler such as "The report is from [publisher]" unless the publisher is relevant to the story.
+7. Mention missing context only when it materially limits understanding.
+8. Never invent facts, names, dates, causes, quotes, or conclusions.
+9. If the supplied information is insufficient, clearly state the limitation rather than guessing.
+10. Return only the bullet points. Do not add a title or source link.
 """
+
 
     try:
         response = nvidia_client.chat.completions.create(
