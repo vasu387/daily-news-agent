@@ -46,7 +46,10 @@ jobs:
               temperature=0.2,
           )
 
+          message = response.choices[0].message
+
           print("Finish reason:", response.choices[0].finish_reason)
-          print("Response:", repr(response.choices[0].message))
+          print("Content:", repr(message.content))
+          print("Reasoning:", repr(message.reasoning_content))
           print("\nNVIDIA API test succeeded.")
           PY
