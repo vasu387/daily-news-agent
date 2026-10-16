@@ -1,0 +1,51 @@
+
+name: Test NVIDIA API
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Python dependencies
+        run: pip install openai
+
+      - name: Test NVIDIA model
+        env:
+          NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
+        run: |
+          python - <<'PY'
+          import os
+          from openai import OpenAI
+
+          key = os.environ.get("NVIDIA_API_KEY")
+          if not key:
+              raise SystemExit("NVIDIA_API_KEY secret is missing.")
+
+          client = OpenAI(
+              base_url="https://integrate.api.nvidia.com/v1",
+              api_key=key,
+          )
+
+          response = client.chat.completions.create(
+              model="nvidia/nemotron-3.5-super-vl-120b-a12b",
+              messages=[
+                  {
+                      "role": "user",
+                      "content": (
+                          "Summarize this fictional news item in 3 concise "
+                          "bullets using simple English. Use only these facts: "
+                          "A research team developed an AI model that uses "
+                          "less computing power and performs similarly to "
+                          "previous approaches. Say when information is limited."
+                      ),
+                  }
+              ],
+              max_tokens=250,
+              temperature=0.2,
+          )
+
+          print(response.choices[0].message.content)
+          print("\nNVIDIA API test succeeded.")
+          PY
