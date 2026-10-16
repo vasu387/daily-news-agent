@@ -5,7 +5,7 @@ name: Daily News Agent
 on:
   workflow_dispatch:
   schedule:
-   - cron: "15 4 * * *"
+    - cron: "15 4 * * *"
 
 jobs:
   collect-and-send-news:
@@ -20,11 +20,14 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Install Python dependencies
+        run: pip install openai
+
       - name: Collect news and send Telegram briefing
-        
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
         run: python news_agent.py
