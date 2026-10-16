@@ -12,6 +12,7 @@ from email.message import EmailMessage
 
 from openai import OpenAI
 
+
 # ============================================================
 # CONFIGURATION
 # ============================================================
@@ -109,8 +110,7 @@ def fetch_headlines(feed_url, limit=STORIES_PER_CATEGORY):
 # ============================================================
 
 def summarize_news(news):
-   
-prompt = f"""
+    prompt = f"""
 You are a reliable daily news summarizer.
 
 Summarize the news using ONLY the supplied headline and RSS description.
@@ -124,13 +124,16 @@ Rules:
 3. Use up to 5 bullet points only when extra details are genuinely useful.
 4. Include the most important facts: who, what happened, and why it matters, if provided.
 5. Never repeat the headline as a bullet point.
-6. Do not add filler such as "The report is from [publisher]" unless the publisher is relevant to the story.
+6. Avoid filler such as naming the publisher unless relevant.
 7. Mention missing context only when it materially limits understanding.
 8. Never invent facts, names, dates, causes, quotes, or conclusions.
-9. If the supplied information is insufficient, clearly state the limitation rather than guessing.
+9. If information is insufficient, clearly state the limitation rather than guessing.
 10. Return only the bullet points. Do not add a title or source link.
 """
 
+    if not nvidia_client:
+        print("NVIDIA API key is not configured.")
+        return None
 
     try:
         response = nvidia_client.chat.completions.create(
@@ -219,6 +222,7 @@ def build_briefing():
 
         if not unique_stories:
             lines.append("No headlines available right now.")
+
         else:
             category_summaries = 0
 
@@ -310,15 +314,24 @@ def make_telegram_chunks(sections, today, summaries_used):
         addition = section + separator
 
         if (
-            len(current) + len(addition) + len(footer) > TELEGRAM_CHUNK_LIMIT
+            len(current) + len(addition) + len(footer)
+            > TELEGRAM_CHUNK_LIMIT
             and current != header
         ):
             chunks.append(current.rstrip())
             current = header
 
         # Keep an individual section within Telegram's message limit.
-        if len(header) + len(section) + len(footer) > TELEGRAM_CHUNK_LIMIT:
-            section = section[:TELEGRAM_CHUNK_LIMIT - len(header) - len(footer) - 20]
+        if (
+            len(header) + len(section) + len(footer)
+            > TELEGRAM_CHUNK_LIMIT
+        ):
+            section = section[
+                :TELEGRAM_CHUNK_LIMIT
+                - len(header)
+                - len(footer)
+                - 20
+            ]
 
         current += section + separator
 
