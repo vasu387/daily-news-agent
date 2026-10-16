@@ -44,6 +44,7 @@ jobs:
               ],
               max_tokens=250,
               temperature=0.2,
+              extra_body={"chat_template_kwargs": {"enable_thinking": False}},
           )
 
           message = response.choices[0].message
